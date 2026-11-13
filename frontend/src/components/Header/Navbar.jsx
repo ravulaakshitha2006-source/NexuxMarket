@@ -36,12 +36,8 @@ export default function Navbar({ searchQuery = '', onSearchChange }) {
           </div>
         </div>
 
-        {/* Right Info */}
-        <div className="flex items-center gap-3">
-          <div className="text-right hidden md:block">
-            <div className="text-xs font-bold text-slate-800">Quantiphi Assessment</div>
-          </div>
-        </div>
+        {/* Right spacer */}
+        <div />
       </div>
     </header>
   );
