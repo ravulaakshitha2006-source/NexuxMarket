@@ -4,6 +4,8 @@ import Sidebar from './components/Sidebar/Sidebar';
 import ProductGrid from './components/Catalog/ProductGrid';
 import SortDropdown from './components/Catalog/SortDropdown';
 import ActiveFiltersBar from './components/Catalog/ActiveFiltersBar';
+import CartDrawer from './components/Cart/CartDrawer';
+import Toast from './components/Cart/Toast';
 import { fetchProducts, fetchInventoryMeta } from './services/api';
 import { SlidersHorizontal, RefreshCw } from 'lucide-react';
 
@@ -28,6 +30,85 @@ export default function App() {
 
   // Mobile Filter Drawer Toggle
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  // Cart Management with localStorage persistence
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nexus_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
+
+  // Save cart to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('nexus_cart', JSON.stringify(cartItems));
+    } catch (e) {
+      console.warn('Failed to save cart to localStorage', e);
+    }
+  }, [cartItems]);
+
+  const totalCartCount = useMemo(() => {
+    return cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  }, [cartItems]);
+
+  // Cart Handlers
+  const handleAddToCart = useCallback((product) => {
+    setCartItems((prevItems) => {
+      const existing = prevItems.find((item) => item.id === product.id);
+      if (existing) {
+        return prevItems.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      }
+      return [
+        ...prevItems,
+        {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          quantity: 1
+        }
+      ];
+    });
+
+    // Trigger toast notification
+    setToastMessage(`Added "${product.name}" to cart`);
+  }, []);
+
+  const handleUpdateQuantity = useCallback((productId, newQuantity) => {
+    if (newQuantity <= 0) {
+      setCartItems((prev) => prev.filter((item) => item.id !== productId));
+    } else {
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.id === productId ? { ...item, quantity: newQuantity } : item
+        )
+      );
+    }
+  }, []);
+
+  const handleRemoveFromCart = useCallback((productId) => {
+    setCartItems((prev) => prev.filter((item) => item.id !== productId));
+  }, []);
+
+  const handleClearCart = useCallback(() => {
+    setCartItems([]);
+  }, []);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (!toastMessage) return;
+    const timer = setTimeout(() => {
+      setToastMessage(null);
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [toastMessage]);
 
   // 1. Initial Load: Fetch Metadata & Initial Products
   useEffect(() => {
@@ -131,6 +212,8 @@ export default function App() {
       <Navbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        cartCount={totalCartCount}
+        onOpenCart={() => setIsCartOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -232,15 +315,33 @@ export default function App() {
               products={products}
               isLoading={isLoading}
               onResetFilters={handleResetFilters}
+              onAddToCart={handleAddToCart}
+              cartItems={cartItems}
             />
           </div>
         </div>
       </main>
 
+      {/* Slide-over Cart Drawer */}
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        cartItems={cartItems}
+        onUpdateQuantity={handleUpdateQuantity}
+        onRemoveItem={handleRemoveFromCart}
+        onClearCart={handleClearCart}
+      />
+
+      {/* Instant Action Toast Notification */}
+      <Toast
+        message={toastMessage}
+        onOpenCart={() => setIsCartOpen(true)}
+      />
+
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-6 mt-16 text-center text-xs text-slate-400">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>&copy; {new Date().getFullYear()} Quantiphi Vibe Coding Assessment. All rights reserved.</span>
+          <span>&copy; {new Date().getFullYear()} E-Commerce Marketplace Store. All rights reserved.</span>
           <span className="font-medium text-slate-500">Built with Node.js & React</span>
         </div>
       </footer>

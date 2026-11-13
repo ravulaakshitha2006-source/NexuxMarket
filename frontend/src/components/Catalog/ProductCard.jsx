@@ -1,7 +1,9 @@
-import React from 'react';
-import { Star, ShoppingBag } from 'lucide-react';
+import React, { useState } from 'react';
+import { Star, ShoppingBag, Check } from 'lucide-react';
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, onAddToCart, countInCart = 0 }) {
+  const [justAdded, setJustAdded] = useState(false);
+
   if (!product) return null;
 
   const {
@@ -14,6 +16,16 @@ export default function ProductCard({ product }) {
     description,
     brand
   } = product;
+
+  const handleAdd = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onAddToCart) {
+      onAddToCart(product);
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 1200);
+    }
+  };
 
   return (
     <article className="group bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-xl hover:border-brand-200 transition-all duration-300 flex flex-col">
@@ -35,6 +47,13 @@ export default function ProductCard({ product }) {
         {brand && (
           <span className="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-medium px-2 py-0.5 rounded-md">
             {brand}
+          </span>
+        )}
+
+        {/* In Cart Indicator on Image */}
+        {countInCart > 0 && (
+          <span className="absolute top-3 right-3 bg-brand-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-md">
+            {countInCart} in cart
           </span>
         )}
       </div>
@@ -94,11 +113,32 @@ export default function ProductCard({ product }) {
 
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 px-3 py-2 bg-brand-50 hover:bg-brand-600 text-brand-700 hover:text-white font-semibold text-xs rounded-xl transition-all duration-200 shadow-sm"
-            aria-label={`Buy ${name}`}
+            onClick={handleAdd}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-2 font-semibold text-xs rounded-xl transition-all duration-200 shadow-sm cursor-pointer ${
+              justAdded
+                ? 'bg-emerald-600 text-white scale-105'
+                : countInCart > 0
+                ? 'bg-brand-600 hover:bg-brand-700 text-white'
+                : 'bg-brand-50 hover:bg-brand-600 text-brand-700 hover:text-white'
+            }`}
+            aria-label={`Add ${name} to cart`}
           >
-            <ShoppingBag className="w-3.5 h-3.5" />
-            <span>Add</span>
+            {justAdded ? (
+              <>
+                <Check className="w-3.5 h-3.5 stroke-[3]" />
+                <span>Added!</span>
+              </>
+            ) : countInCart > 0 ? (
+              <>
+                <ShoppingBag className="w-3.5 h-3.5" />
+                <span>Add More ({countInCart})</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBag className="w-3.5 h-3.5" />
+                <span>Add</span>
+              </>
+            )}
           </button>
         </div>
       </div>

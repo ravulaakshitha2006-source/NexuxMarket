@@ -5,7 +5,9 @@ import EmptyState from './EmptyState';
 export default function ProductGrid({
   products = [],
   isLoading = false,
-  onResetFilters
+  onResetFilters,
+  onAddToCart,
+  cartItems = []
 }) {
   if (isLoading) {
     return (
@@ -39,9 +41,19 @@ export default function ProductGrid({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
+      {products.map((product) => {
+        const cartEntry = cartItems.find((item) => item.id === product.id);
+        const countInCart = cartEntry ? cartEntry.quantity : 0;
+
+        return (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onAddToCart={onAddToCart}
+            countInCart={countInCart}
+          />
+        );
+      })}
     </div>
   );
 }
