@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, Search, Sparkles } from 'lucide-react';
+import { ShoppingBag, Search } from 'lucide-react';
 
 export default function Navbar({ searchQuery = '', onSearchChange }) {
   return (
@@ -11,15 +11,9 @@ export default function Navbar({ searchQuery = '', onSearchChange }) {
             <ShoppingBag className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-slate-900 text-lg tracking-tight">
-                NexusMarket
-              </span>
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-brand-700 px-2 py-0.5 rounded-full border border-indigo-100">
-                <Sparkles className="w-3 h-3 text-brand-500" />
-                Vibe Coding
-              </span>
-            </div>
+            <span className="font-extrabold text-slate-900 text-lg tracking-tight">
+              NexusMarket
+            </span>
             <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
               High-Traffic Product Multi-Filter Catalog
             </p>
@@ -46,7 +40,6 @@ export default function Navbar({ searchQuery = '', onSearchChange }) {
         <div className="flex items-center gap-3">
           <div className="text-right hidden md:block">
             <div className="text-xs font-bold text-slate-800">Quantiphi Assessment</div>
-            <div className="text-[10px] text-slate-400 font-medium">SRU Vibe Round</div>
           </div>
         </div>
       </div>
